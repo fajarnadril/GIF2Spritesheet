@@ -84,6 +84,15 @@ st.markdown("""
         .button:hover {
             background-color: #45a049;
         }
+        .column {
+            width: 45%;
+        }
+        .image-display {
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+            margin-top: 20px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -119,8 +128,8 @@ with col2:
     uploaded_file = st.file_uploader("Upload your GIF", type="gif")
 
     if uploaded_file is not None:
-        # Display the preview of the GIF (resized)
-        st.image(uploaded_file, caption="Uploaded GIF", width=150)  # Preview with 150px width
+        # Display the preview of the GIF (resized to maintain consistent size)
+        st.image(uploaded_file, caption="Uploaded GIF", width=300)  # Set fixed display size for preview (300px width)
 
         # Save the uploaded GIF temporarily
         with open("uploaded.gif", "wb") as f:
@@ -131,8 +140,8 @@ with col2:
             sprite_width, sprite_height, total_frames, margin = st.session_state['sprite_params']
             spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
 
-            # Display the generated spritesheet
-            st.image(spritesheet_path, caption="Generated Spritesheet", use_column_width=True)
+            # Display the generated spritesheet (same size as the uploaded GIF)
+            st.image(spritesheet_path, caption="Generated Spritesheet", width=300)  # Set fixed display size for preview (300px width)
 
             # Provide a download button for the spritesheet
             st.download_button(
@@ -140,5 +149,3 @@ with col2:
                 data=open(spritesheet_path, "rb").read(),
                 file_name="spritesheet.png",
                 mime="image/png",
-                help="Click to download the generated spritesheet"
-            )
