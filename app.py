@@ -88,10 +88,26 @@ st.markdown("""
             width: 45%;
         }
         .image-display {
-            width: 100%;
-            height: 300px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
             margin-top: 20px;
+        }
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .upload-label {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .upload-button {
+            padding: 10px;
+            background-color: #2D89FF;
+            color: white;
+            border-radius: 5px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -118,18 +134,20 @@ with col1:
         st.error("Please enter valid integer values for Sprite Width, Sprite Height, Total Frames, and Margin.")
         sprite_width = sprite_height = total_frames = margin = 64  # Reset to default values
 
+    # File uploader for the GIF
+    st.markdown('<div class="upload-section">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Upload your GIF", type="gif")
+    st.markdown('</div>', unsafe_allow_html=True)
+
     if st.button("Generate Spritesheet"):
         st.session_state['sprite_params'] = (sprite_width, sprite_height, total_frames, margin)
 
 with col2:
     st.header("Upload GIF and Spritesheet Preview")
     
-    # File uploader for the GIF
-    uploaded_file = st.file_uploader("Upload your GIF", type="gif")
-
+    # Display the uploaded GIF with a fixed width of 100px for consistent preview size
     if uploaded_file is not None:
-        # Display the preview of the GIF (resized to maintain consistent size)
-        st.image(uploaded_file, caption="Uploaded GIF", width=300)  # Set fixed display size for preview (300px width)
+        st.image(uploaded_file, caption="Uploaded GIF", width=100)  # Fixed width for GIF preview (100px)
 
         # Save the uploaded GIF temporarily
         with open("uploaded.gif", "wb") as f:
@@ -141,11 +159,4 @@ with col2:
             spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
 
             # Display the generated spritesheet (same size as the uploaded GIF)
-            st.image(spritesheet_path, caption="Generated Spritesheet", width=300)  # Set fixed display size for preview (300px width)
-
-            # Provide a download button for the spritesheet
-            st.download_button(
-                label="Download Spritesheet",
-                data=open(spritesheet_path, "rb").read(),
-                file_name="spritesheet.png",
-                mime="image/png",
+            st.image(spritesheet_path, caption="Generated Spritesheet",_
