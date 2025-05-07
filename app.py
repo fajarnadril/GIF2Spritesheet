@@ -87,42 +87,48 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Layout: 2 columns (left for GIF upload, right for spritesheet preview)
-col1, col2 = st.columns([1, 1])
+# Layout: 2 columns (left for text input fields, right for GIF upload and spritesheet preview)
+col1, col2 = st.columns([1, 2])
 
 with col1:
-    st.header("Upload GIF")
+    st.header("Customize Spritesheet")
+    
+    # Text boxes for customizable settings (input fields)
+    sprite_width = st.text_input("Sprite Width", value="64")  # Default value is 64px
+    sprite_height = st.text_input("Sprite Height", value="64")  # Default value is 64px
+    total_frames = st.text_input("Total Frames", value="20")  # Default value is 20
+    margin = st.text_input("Margin Between Frames", value="5")  # Default value is 5px
+
+    # Validate input (ensure they are integers and convert them)
+    try:
+        sprite_width = int(sprite_width)
+        sprite_height = int(sprite_height)
+        total_frames = int(total_frames)
+        margin = int(margin)
+    except ValueError:
+        st.error("Please enter valid integer values for Sprite Width, Sprite Height, Total Frames, and Margin.")
+        sprite_width = sprite_height = total_frames = margin = 64  # Reset to default values
+
+    if st.button("Generate Spritesheet"):
+        st.session_state['sprite_params'] = (sprite_width, sprite_height, total_frames, margin)
+
+with col2:
+    st.header("Upload GIF and Spritesheet Preview")
+    
     # File uploader for the GIF
     uploaded_file = st.file_uploader("Upload your GIF", type="gif")
 
-with col2:
-    st.header("Spritesheet Preview")
     if uploaded_file is not None:
         # Display the preview of the GIF (resized)
         st.image(uploaded_file, caption="Uploaded GIF", width=150)  # Preview with 150px width
 
-        # Text boxes for customizable settings (no sliders)
-        sprite_width = st.text_input("Sprite Width", value="64")  # Default value is 64px
-        sprite_height = st.text_input("Sprite Height", value="64")  # Default value is 64px
-        total_frames = st.text_input("Total Frames", value="20")  # Default value is 20
-        margin = st.text_input("Margin Between Frames", value="5")  # Default value is 5px
+        # Save the uploaded GIF temporarily
+        with open("uploaded.gif", "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
-        # Validate input (ensure they are integers and convert them)
-        try:
-            sprite_width = int(sprite_width)
-            sprite_height = int(sprite_height)
-            total_frames = int(total_frames)
-            margin = int(margin)
-        except ValueError:
-            st.error("Please enter valid integer values for Sprite Width, Sprite Height, Total Frames, and Margin.")
-            sprite_width = sprite_height = total_frames = margin = 64  # Reset to default values
-
-        # Convert GIF to spritesheet when button is clicked
-        if st.button("Generate Spritesheet"):
-            with open("uploaded.gif", "wb") as f:
-                f.write(uploaded_file.getbuffer())
-
-            # Generate spritesheet
+        # Generate spritesheet when button is clicked
+        if 'sprite_params' in st.session_state:
+            sprite_width, sprite_height, total_frames, margin = st.session_state['sprite_params']
             spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
 
             # Display the generated spritesheet
