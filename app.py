@@ -159,4 +159,13 @@ with col2:
             spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
 
             # Display the generated spritesheet (same size as the uploaded GIF)
-            st.image(spritesheet_path, caption="Generated Spritesheet",_
+            st.image(spritesheet_path, caption="Generated Spritesheet", width=100)  # Fixed width for preview (100px)
+
+            # Provide a download button for the spritesheet
+            st.download_button(
+                label="Download Spritesheet",
+                data=open(spritesheet_path, "rb").read(),
+                file_name="spritesheet.png",
+                mime="image/png",
+                help="Click to download the generated spritesheet"
+            )
