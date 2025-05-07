@@ -1,16 +1,15 @@
-
 import streamlit as st
 from PIL import Image
 import math
 import os
 
-# Fungsi untuk mengubah gif menjadi spritesheet dengan margin dan pengaturan otomatis row/column
+# Function to convert GIF to spritesheet
 def gif_to_spritesheet(gif_path, sprite_width, sprite_height, total_frames, margin):
-    # Membuka GIF
+    # Open the GIF
     gif = Image.open(gif_path)
     frames = []
 
-    # Menyimpan semua frame GIF ke dalam list
+    # Save all frames of the GIF into a list
     while True:
         frames.append(gif.copy())
         try:
@@ -18,37 +17,33 @@ def gif_to_spritesheet(gif_path, sprite_width, sprite_height, total_frames, marg
         except EOFError:
             break
 
-    # Menentukan jumlah kolom dan baris yang seimbang
-    columns = math.ceil(math.sqrt(total_frames))  # Menggunakan akar kuadrat untuk membuat bentuk kotak
+    # Calculate the number of rows and columns for the spritesheet
+    columns = math.ceil(math.sqrt(total_frames))  # Using square root to make it more square-like
     rows = math.ceil(total_frames / columns)
 
-    # Menentukan ukuran spritesheet dengan margin
-    spritesheet_width = (sprite_width + margin) * columns - margin  # Lebar per kolom + margin
-    spritesheet_height = (sprite_height + margin) * rows - margin  # Tinggi per baris + margin
+    # Calculate the size of the spritesheet with margin
+    spritesheet_width = (sprite_width + margin) * columns - margin
+    spritesheet_height = (sprite_height + margin) * rows - margin
 
-    # Membuat canvas kosong untuk spritesheet
+    # Create a blank canvas for the spritesheet
     spritesheet = Image.new("RGBA", (spritesheet_width, spritesheet_height))
 
-    # Menambahkan setiap frame ke dalam spritesheet
+    # Add each frame to the spritesheet
     for idx, frame in enumerate(frames):
-        if idx >= total_frames:  # Pastikan hanya menggunakan jumlah frame yang diinginkan
+        if idx >= total_frames:
             break
-
-        # Hitung posisi kolom dan baris frame
         row = idx // columns
         col = idx % columns
 
-        # Posisi x dan y di dalam spritesheet
+        # Position x and y in the spritesheet
         x_pos = col * (sprite_width + margin)
         y_pos = row * (sprite_height + margin)
 
-        # Resize frame sesuai ukuran sprite
+        # Resize the frame and paste it into the spritesheet
         frame_resized = frame.resize((sprite_width, sprite_height))
-
-        # Menempelkan frame ke posisi yang sesuai di spritesheet
         spritesheet.paste(frame_resized, (x_pos, y_pos))
 
-    # Menyimpan spritesheet ke file sementara
+    # Save the spritesheet as a file
     output_path = "spritesheet.png"
     spritesheet.save(output_path)
 
@@ -57,28 +52,39 @@ def gif_to_spritesheet(gif_path, sprite_width, sprite_height, total_frames, marg
 # Streamlit app layout
 st.title("GIF to Spritesheet Converter")
 
-# File uploader
+# File uploader for GIF
 uploaded_file = st.file_uploader("Upload your GIF", type="gif")
 
 if uploaded_file is not None:
-    # Read the parameters
+    # Load the uploaded GIF and display it
+    img = Image.open(uploaded_file)
+
+    # Resize the GIF (actual resizing, not just display size)
+    width = st.number_input("Resize width for display:", min_value=1, value=400)
+    height = int((width / float(img.size[0])) * float(img.size[1]))  # Maintain aspect ratio
+    img_resized = img.resize((width, height))
+
+    # Display the resized image
+    st.image(img_resized, caption="Resized GIF", use_column_width=True)
+
+    # Parameters for spritesheet
     sprite_width = st.number_input("Sprite Width", min_value=1, value=64)
     sprite_height = st.number_input("Sprite Height", min_value=1, value=64)
     total_frames = st.number_input("Total Frames", min_value=1, value=20)
-    margin = st.number_input("Margin", min_value=0, value=5)
+    margin = st.number_input("Margin Between Frames", min_value=0, value=5)
 
-    # Display the uploaded GIF
-    st.image(uploaded_file, caption="Uploaded GIF", use_column_width=True, width=100, height=100)
-
-    # Process the GIF
     if st.button("Convert to Spritesheet"):
+        # Save the uploaded GIF temporarily
         with open("uploaded.gif", "wb") as f:
             f.write(uploaded_file.getbuffer())
 
+        # Convert GIF to spritesheet
         spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
-        st.image(spritesheet_path, width=100, height=100)
 
-        # Provide download link
+        # Display the generated spritesheet
+        st.image(spritesheet_path, caption="Generated Spritesheet", use_column_width=True)
+
+        # Provide a download button for the spritesheet
         st.download_button(
             label="Download Spritesheet",
             data=open(spritesheet_path, "rb").read(),
