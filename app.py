@@ -50,30 +50,63 @@ def gif_to_spritesheet(gif_path, sprite_width, sprite_height, total_frames, marg
     return output_path
 
 # Streamlit app layout
+st.set_page_config(page_title="GIF to Spritesheet Converter", layout="wide")
 st.title("GIF to Spritesheet Converter")
 
-# File uploader for GIF
+# Add some styling to make it more professional
+st.markdown("""
+    <style>
+        .main {
+            padding: 20px;
+        }
+        .header {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2F4F4F;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .container > div {
+            width: 45%;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# File uploader for the GIF
 uploaded_file = st.file_uploader("Upload your GIF", type="gif")
 
 if uploaded_file is not None:
-    # Load the uploaded GIF and display it
+    # Load the uploaded GIF and display it (no resizing)
     img = Image.open(uploaded_file)
 
-    # Resize the GIF (actual resizing, not just display size)
-    width = st.number_input("Resize width for display:", min_value=1, value=400)
-    height = int((width / float(img.size[0])) * float(img.size[1]))  # Maintain aspect ratio
-    img_resized = img.resize((width, height))
-
-    # Display the resized image
-    st.image(img_resized, caption="Resized GIF", use_column_width=True)
+    # Display the GIF with specific dimensions for layout (without resizing it)
+    st.markdown('<div class="container">', unsafe_allow_html=True)
+    st.markdown('<div class="header">Uploaded GIF:</div>', unsafe_allow_html=True)
+    st.image(uploaded_file, caption="Uploaded GIF", use_column_width=True)  # Display original size, with small width for layout
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Parameters for spritesheet
-    sprite_width = st.number_input("Sprite Width", min_value=1, value=64)
-    sprite_height = st.number_input("Sprite Height", min_value=1, value=64)
-    total_frames = st.number_input("Total Frames", min_value=1, value=20)
-    margin = st.number_input("Margin Between Frames", min_value=0, value=5)
+    st.markdown('<div class="container">', unsafe_allow_html=True)
+    sprite_width = st.number_input("Sprite Width", min_value=1, value=64, step=1, label_visibility="collapsed")
+    sprite_height = st.number_input("Sprite Height", min_value=1, value=64, step=1, label_visibility="collapsed")
+    total_frames = st.number_input("Total Frames", min_value=1, value=20, label_visibility="collapsed")
+    margin = st.number_input("Margin Between Frames", min_value=0, value=5, label_visibility="collapsed")
 
-    if st.button("Convert to Spritesheet"):
+    if st.button("Convert to Spritesheet", key="convert_spritesheet"):
         # Save the uploaded GIF temporarily
         with open("uploaded.gif", "wb") as f:
             f.write(uploaded_file.getbuffer())
@@ -82,12 +115,18 @@ if uploaded_file is not None:
         spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
 
         # Display the generated spritesheet
-        st.image(spritesheet_path, caption="Generated Spritesheet", use_column_width=True)
+        st.markdown('<div class="container">', unsafe_allow_html=True)
+        st.markdown('<div class="header">Generated Spritesheet:</div>', unsafe_allow_html=True)
+        st.image(spritesheet_path, caption="Generated Spritesheet", use_column_width=True)  # Display spritesheet
+        st.markdown('</div>', unsafe_allow_html=True)
 
         # Provide a download button for the spritesheet
         st.download_button(
             label="Download Spritesheet",
             data=open(spritesheet_path, "rb").read(),
             file_name="spritesheet.png",
-            mime="image/png"
+            mime="image/png",
+            help="Click to download the generated spritesheet"
         )
+
+    st.markdown('</div>', unsafe_allow_html=True)
