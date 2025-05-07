@@ -68,7 +68,7 @@ if uploaded_file is not None:
     margin = st.number_input("Margin", min_value=0, value=5)
 
     # Display the uploaded GIF
-    st.image(uploaded_file, caption="Uploaded GIF", use_column_width=True, width=100)
+    st.image(uploaded_file, caption="Uploaded GIF", use_column_width=True, width=100, height=100)
 
     # Process the GIF
     if st.button("Convert to Spritesheet"):
@@ -76,7 +76,7 @@ if uploaded_file is not None:
             f.write(uploaded_file.getbuffer())
 
         spritesheet_path = gif_to_spritesheet("uploaded.gif", sprite_width, sprite_height, total_frames, margin)
-        st.image(spritesheet_path, width=100)
+        st.image(spritesheet_path, width=100, height=100)
 
         # Provide download link
         st.download_button(
