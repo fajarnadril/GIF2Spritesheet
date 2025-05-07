@@ -109,6 +109,16 @@ st.markdown("""
             color: white;
             border-radius: 5px;
         }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .image-preview-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -136,8 +146,12 @@ st.markdown('<div class="upload-section">', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("Upload your GIF", type="gif")
 st.markdown('</div>', unsafe_allow_html=True)
 
-if st.button("Generate Spritesheet"):
-    st.session_state['sprite_params'] = (sprite_width, sprite_height, total_frames, margin)
+# Buttons for generating spritesheet and downloading side by side
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("Generate Spritesheet"):
+        st.session_state['sprite_params'] = (sprite_width, sprite_height, total_frames, margin)
 
 # Display the uploaded GIF and generate spritesheet preview
 if uploaded_file is not None:
@@ -157,10 +171,11 @@ if uploaded_file is not None:
         st.image(spritesheet_path, caption="Generated Spritesheet", width=100)  # Fixed width for preview (100px)
 
         # Provide a download button for the spritesheet
-        st.download_button(
-            label="Download Spritesheet",
-            data=open(spritesheet_path, "rb").read(),
-            file_name="spritesheet.png",
-            mime="image/png",
-            help="Click to download the generated spritesheet"
-        )
+        with col2:
+            st.download_button(
+                label="Download Spritesheet",
+                data=open(spritesheet_path, "rb").read(),
+                file_name="spritesheet.png",
+                mime="image/png",
+                help="Click to download the generated spritesheet"
+            )
